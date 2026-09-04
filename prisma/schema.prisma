@@ -17,7 +17,6 @@ model User {
   username  String   @unique
   email     String   @unique
   password  String
-
   bio       String?
   image     String?
   role      UserRole @default(USER)
@@ -25,6 +24,9 @@ model User {
   articles  Article[]
   favorites Favorite[]
   comments  Comment[]
+
+  followers Follow[] @relation("UserFollowing")
+  following Follow[] @relation("UserFollowers")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -90,7 +92,7 @@ model Favorite {
 }
 
 model Comment {
-  id        String   @id @default(uuid())
+  id        Int      @id @default(autoincrement())
   body      String
 
   authorId  String
@@ -104,4 +106,19 @@ model Comment {
 
   @@index([articleId])
   @@map("comments")
+}
+
+model Follow {
+  followerId  String
+  followingId String
+
+  follower User @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+
+  following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId])
+  @@map("follows")
 }

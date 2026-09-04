@@ -18,7 +18,7 @@ export async function authMiddleware(
     if (!authorization) {
       return res.status(401).json({
         errors: {
-          body: ["Authorization header is required"],
+          token: ["is missing"],
         },
       });
     }
@@ -28,7 +28,7 @@ export async function authMiddleware(
     if (scheme !== "Token" || !token) {
       return res.status(401).json({
         errors: {
-          body: ["Invalid authorization format"],
+          token: ["is invalid"],
         },
       });
     }
@@ -44,7 +44,7 @@ export async function authMiddleware(
     if (!user) {
       return res.status(401).json({
         errors: {
-          body: ["User not found"],
+          token: ["is invalid"],
         },
       });
     }
@@ -55,7 +55,7 @@ export async function authMiddleware(
   } catch (error) {
     return res.status(401).json({
       errors: {
-        body: ["Invalid token"],
+        token: ["is invalid"],
       },
     });
   }

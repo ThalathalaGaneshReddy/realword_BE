@@ -1,6 +1,14 @@
 import { prisma } from "../lib/prisma";
 import { slugify } from "../utils/slug";
 
+interface GetArticlesParams {
+  author?: string;
+  tag?: string;
+  favorited?: string;
+  limit?: number;
+  offset?: number;
+}
+
 const articleListInclude = {
   author: {
     select: {
@@ -164,38 +172,73 @@ export async function getArticleBySlug(slug: string) {
   });
 }
 
-export async function getArticles(options: { author?: string; tag?: string }) {
-  const { author, tag } = options;
+export async function getArticles({
+  author,
+  tag,
+  favorited,
+  limit = 20,
+  offset = 0,
+}: GetArticlesParams) {
+  const where: any = {};
 
-  return prisma.article.findMany({
-    where: {
-      ...(author
-        ? {
-            author: {
-              username: author,
-            },
-          }
-        : {}),
+  if (author) {
+    where.author = {
+      username: author,
+    };
+  }
 
-      ...(tag
-        ? {
-            tags: {
-              some: {
-                tag: {
-                  name: tag,
-                },
-              },
-            },
-          }
-        : {}),
-    },
+  if (tag) {
+    where.tags = {
+      some: {
+        tag: {
+          name: tag,
+        },
+      },
+    };
+  }
 
-    include: articleListInclude,
+  if (favorited) {
+    where.favorites = {
+      some: {
+        user: {
+          username: favorited,
+        },
+      },
+    };
+  }
 
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const [articles, articlesCount] = await Promise.all([
+    prisma.article.findMany({
+      where,
+
+      include: {
+        author: true,
+
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+
+        favorites: true,
+      },
+
+      orderBy: {
+        createdAt: "desc",
+      },
+
+      skip: offset,
+      take: limit,
+    }),
+    prisma.article.count({
+      where,
+    }),
+  ]);
+
+  return {
+    articles,
+    articlesCount,
+  };
 }
 
 export async function updateArticle(
@@ -259,18 +302,6 @@ export async function updateArticle(
           : {}),
       },
     });
-
-    /**
-     * VERY IMPORTANT
-     *
-     * undefined:
-     *   Don't touch existing tags.
-     *
-     * []:
-     *   Remove all tags.
-     *
-     * ["tag1"]&#58;          *   Replace tags.
-     */
     if (data.tagList !== undefined) {
       await tx.articleTag.deleteMany({
         where: {

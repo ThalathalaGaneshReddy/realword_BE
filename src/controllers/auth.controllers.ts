@@ -1,39 +1,70 @@
 import { Request, Response } from "express";
 import bcrypt from "bcryptjs";
+
 import { prisma } from "../lib/prisma";
 import { getUserResponse } from "../utils/user-response";
 
 export async function register(req: Request, res: Response) {
   try {
-    const { user } = req.body;
+    const user = req.body?.user;
 
-    if (!user?.username || !user?.email || !user?.password) {
+    if (!user) {
       return res.status(422).json({
         errors: {
-          body: ["username, email and password are required"],
+          body: ["user is required"],
         },
       });
     }
 
-    const email = user.email.toLowerCase();
+    if (typeof user.username !== "string" || !user.username.trim()) {
+      return res.status(422).json({
+        errors: {
+          username: ["can't be blank"],
+        },
+      });
+    }
+    if (typeof user.email !== "string" || !user.email.trim()) {
+      return res.status(422).json({
+        errors: {
+          email: ["can't be blank"],
+        },
+      });
+    }
+    if (typeof user.password !== "string" || !user.password.trim()) {
+      return res.status(422).json({
+        errors: {
+          password: ["can't be blank"],
+        },
+      });
+    }
 
-    const existingUser = await prisma.user.findFirst({
+    const username = user.username.trim();
+    const email = user.email.trim().toLowerCase();
+
+    const existingUsername = await prisma.user.findUnique({
       where: {
-        OR: [
-          {
-            username: user.username,
-          },
-          {
-            email,
-          },
-        ],
+        username,
       },
     });
 
-    if (existingUser) {
-      return res.status(422).json({
+    if (existingUsername) {
+      return res.status(409).json({
         errors: {
-          body: ["Username or email already exists"],
+          username: ["has already been taken"],
+        },
+      });
+    }
+
+    const existingEmail = await prisma.user.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    if (existingEmail) {
+      return res.status(409).json({
+        errors: {
+          email: ["has already been taken"],
         },
       });
     }
@@ -42,11 +73,11 @@ export async function register(req: Request, res: Response) {
 
     const newUser = await prisma.user.create({
       data: {
-        username: user.username,
+        username,
         email,
         password: hashedPassword,
-        bio: null,
-        image: null,
+        bio: user.bio ?? null,
+        image: user.image ?? null,
       },
     });
 
@@ -54,7 +85,7 @@ export async function register(req: Request, res: Response) {
       user: getUserResponse(newUser),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Register error:", error);
 
     return res.status(500).json({
       errors: {
@@ -66,17 +97,32 @@ export async function register(req: Request, res: Response) {
 
 export async function login(req: Request, res: Response) {
   try {
-    const { user } = req.body;
+    const user = req.body?.user;
 
-    if (!user?.email || !user?.password) {
+    if (!user) {
       return res.status(422).json({
         errors: {
-          body: ["email and password are required"],
+          body: ["user is required"],
         },
       });
     }
 
-    const email = user.email.toLowerCase();
+    if (typeof user.email !== "string" || !user.email.trim()) {
+      return res.status(422).json({
+        errors: {
+          email: ["can't be blank"],
+        },
+      });
+    }
+    if (typeof user.password !== "string" || !user.password.trim()) {
+      return res.status(422).json({
+        errors: {
+          password: ["can't be blank"],
+        },
+      });
+    }
+
+    const email = user.email.trim().toLowerCase();
 
     const dbUser = await prisma.user.findUnique({
       where: {
@@ -87,7 +133,7 @@ export async function login(req: Request, res: Response) {
     if (!dbUser) {
       return res.status(401).json({
         errors: {
-          body: ["Invalid email or password"],
+          credentials: ["invalid"],
         },
       });
     }
@@ -97,7 +143,7 @@ export async function login(req: Request, res: Response) {
     if (!passwordValid) {
       return res.status(401).json({
         errors: {
-          body: ["Invalid email or password"],
+          credentials: ["invalid"],
         },
       });
     }
@@ -106,7 +152,7 @@ export async function login(req: Request, res: Response) {
       user: getUserResponse(dbUser),
     });
   } catch (error) {
-    console.error(error);
+    console.error("Login error:", error);
 
     return res.status(500).json({
       errors: {

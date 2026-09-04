@@ -96,24 +96,36 @@ export async function listArticlesController(
 
     const tag = typeof req.query.tag === "string" ? req.query.tag : undefined;
 
-    const articles = await getArticles({
+    const favorited =
+      typeof req.query.favorited === "string" ? req.query.favorited : undefined;
+
+    const limitValue =
+      typeof req.query.limit === "string" ? Number(req.query.limit) : 20;
+
+    const offsetValue =
+      typeof req.query.offset === "string" ? Number(req.query.offset) : 0;
+
+    const limit =
+      Number.isInteger(limitValue) && limitValue > 0 ? limitValue : 20;
+
+    const offset =
+      Number.isInteger(offsetValue) && offsetValue >= 0 ? offsetValue : 0;
+
+    const { articles, articlesCount } = await getArticles({
       author,
       tag,
+      favorited,
+      limit,
+      offset,
     });
 
-    /**
-     * IMPORTANT:
-     *
-     * serializeArticleList()
-     * does NOT return body.
-     */
     const result = articles.map((article) =>
       serializeArticleList(article, req.userId),
     );
 
     return res.status(200).json({
       articles: result,
-      articlesCount: result.length,
+      articlesCount,
     });
   } catch (error) {
     console.error("List articles error:", error);
@@ -169,14 +181,6 @@ export async function updateArticleController(
         },
       });
     }
-
-    /**
-     * Hurl expects:
-     *
-     * tagList: null
-     *     ↓
-     * 422
-     */
     if (article.tagList === null) {
       return res.status(422).json({
         errors: {
@@ -185,9 +189,6 @@ export async function updateArticleController(
       });
     }
 
-    /**
-     * If tagList exists, it must be array.
-     */
     if (article.tagList !== undefined && !Array.isArray(article.tagList)) {
       return res.status(422).json({
         errors: {
@@ -200,13 +201,6 @@ export async function updateArticleController(
       title: article.title,
       description: article.description,
       body: article.body,
-
-      /**
-       * IMPORTANT:
-       *
-       * undefined -> preserve tags
-       * []        -> remove tags
-       */
       tagList: article.tagList,
     });
 
@@ -217,11 +211,10 @@ export async function updateArticleController(
         },
       });
     }
-
     if (result.type === "FORBIDDEN") {
       return res.status(403).json({
         errors: {
-          article: ["you are not the author"],
+          article: ["forbidden"],
         },
       });
     }
@@ -254,11 +247,10 @@ export async function deleteArticleController(
         },
       });
     }
-
     if (result.type === "FORBIDDEN") {
       return res.status(403).json({
         errors: {
-          article: ["you are not the author"],
+          article: ["forbidden"],
         },
       });
     }

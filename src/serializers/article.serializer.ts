@@ -32,54 +32,39 @@ type ArticleData = {
   };
 };
 
-/**
- * Used by:
- * GET /api/articles
- *
- * IMPORTANT:
- * body is NOT returned.
- */
 export function serializeArticleList(
-  article: ArticleData,
+  article: any,
   currentUserId?: string,
+  followingIds: string[] = [],
 ) {
   const favorites = article.favorites ?? [];
 
   return {
-    title: article.title,
-
     slug: article.slug,
-
+    title: article.title,
     description: article.description,
 
-    tagList: article.tags.map((articleTag) => articleTag.tag.name),
+    tagList: (article.tags ?? []).map((articleTag: any) => articleTag.tag.name),
 
-    createdAt: article.createdAt.toISOString(),
-
-    updatedAt: article.updatedAt.toISOString(),
+    createdAt: article.createdAt,
+    updatedAt: article.updatedAt,
 
     favorited: currentUserId
-      ? favorites.some((favorite) => favorite.userId === currentUserId)
+      ? favorites.some((favorite: any) => favorite.userId === currentUserId)
       : false,
 
-    favoritesCount: article._count?.favorites ?? favorites.length,
+    favoritesCount: favorites.length,
 
     author: {
       username: article.author.username,
       bio: article.author.bio,
       image: article.author.image,
+
+      following: followingIds.includes(article.authorId),
     },
   };
 }
 
-/**
- * Used by:
- * GET /api/articles/:slug
- * POST /api/articles
- * PUT /api/articles/:slug
- *
- * body IS returned.
- */
 export function serializeArticleDetail(
   article: ArticleData,
   currentUserId?: string,
