@@ -3,6 +3,7 @@ import { Response } from "express";
 import { prisma } from "../lib/prisma";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { serializeArticleList } from "../serializers/article.serializer";
+import { MESSAGES } from "../constants/messages";
 
 export async function feedArticlesController(
   req: AuthenticatedRequest,
@@ -10,6 +11,7 @@ export async function feedArticlesController(
 ) {
   try {
     const userId = req.userId!;
+
     const limitValue =
       typeof req.query.limit === "string" ? Number(req.query.limit) : 20;
 
@@ -81,7 +83,7 @@ export async function feedArticlesController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

@@ -3,6 +3,7 @@ import { Response } from "express";
 import { prisma } from "../lib/prisma";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { serializeArticleDetail } from "../serializers/article.serializer";
+import { MESSAGES } from "../constants/messages";
 
 export async function favoriteArticleController(
   req: AuthenticatedRequest,
@@ -29,7 +30,7 @@ export async function favoriteArticleController(
     if (!article) {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
@@ -71,11 +72,12 @@ export async function favoriteArticleController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
 }
+
 export async function unfavoriteArticleController(
   req: AuthenticatedRequest,
   res: Response,
@@ -92,7 +94,7 @@ export async function unfavoriteArticleController(
     if (!article) {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
@@ -127,7 +129,7 @@ export async function unfavoriteArticleController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

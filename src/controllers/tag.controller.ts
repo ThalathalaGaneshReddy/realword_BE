@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import { prisma } from "../lib/prisma";
+import { MESSAGES } from "../constants/messages";
 
 export async function getTagsController(_req: Request, res: Response) {
   try {
@@ -21,7 +22,7 @@ export async function getTagsController(_req: Request, res: Response) {
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

@@ -2,6 +2,7 @@ import { Response } from "express";
 
 import { prisma } from "../lib/prisma";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
+import { MESSAGES } from "../constants/messages";
 
 export async function getProfileController(
   req: AuthenticatedRequest,
@@ -19,7 +20,7 @@ export async function getProfileController(
     if (!profileUser) {
       return res.status(404).json({
         errors: {
-          profile: ["not found"],
+          profile: [MESSAGES.PROFILE.NOT_FOUND],
         },
       });
     }
@@ -52,7 +53,7 @@ export async function getProfileController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -75,7 +76,7 @@ export async function followProfileController(
     if (!profileUser) {
       return res.status(404).json({
         errors: {
-          profile: ["not found"],
+          profile: [MESSAGES.PROFILE.NOT_FOUND],
         },
       });
     }
@@ -107,7 +108,7 @@ export async function followProfileController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -130,7 +131,7 @@ export async function unfollowProfileController(
     if (!profileUser) {
       return res.status(404).json({
         errors: {
-          profile: ["not found"],
+          profile: [MESSAGES.PROFILE.NOT_FOUND],
         },
       });
     }
@@ -155,7 +156,7 @@ export async function unfollowProfileController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

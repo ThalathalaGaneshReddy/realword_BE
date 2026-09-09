@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { getUserResponse } from "../utils/user-response";
+import { MESSAGES } from "../constants/messages";
 
 function normalizeNullableString(value: unknown): string | null {
   if (value === null) return null;
@@ -24,7 +25,7 @@ export async function getCurrentUser(req: AuthenticatedRequest, res: Response) {
     if (!user) {
       return res.status(401).json({
         errors: {
-          token: ["is invalid"],
+          token: [MESSAGES.AUTH.TOKEN_INVALID],
         },
       });
     }
@@ -37,7 +38,7 @@ export async function getCurrentUser(req: AuthenticatedRequest, res: Response) {
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -50,7 +51,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
     if (!user) {
       return res.status(422).json({
         errors: {
-          body: ["user is required"],
+          body: [MESSAGES.USER.REQUIRED],
         },
       });
     }
@@ -59,7 +60,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       if (typeof user.username !== "string" || !user.username.trim()) {
         return res.status(422).json({
           errors: {
-            username: ["can't be blank"],
+            username: [MESSAGES.VALIDATION.CANT_BE_BLANK],
           },
         });
       }
@@ -69,7 +70,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       if (typeof user.email !== "string" || !user.email.trim()) {
         return res.status(422).json({
           errors: {
-            email: ["can't be blank"],
+            email: [MESSAGES.VALIDATION.CANT_BE_BLANK],
           },
         });
       }
@@ -79,7 +80,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       if (typeof user.password !== "string" || !user.password.trim()) {
         return res.status(422).json({
           errors: {
-            password: ["can't be blank"],
+            password: [MESSAGES.VALIDATION.CANT_BE_BLANK],
           },
         });
       }
@@ -87,7 +88,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       if (user.password.length < 8) {
         return res.status(422).json({
           errors: {
-            password: ["is too short (minimum is 8 characters)"],
+            password: [MESSAGES.VALIDATION.PASSWORD_TOO_SHORT],
           },
         });
       }
@@ -114,30 +115,13 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
     }
 
     if (user.bio !== undefined) {
-      data.bio =
-        user.bio === null
-          ? null
-          : typeof user.bio === "string"
-            ? user.bio
-            : null;
-    }
-
-    if (user.image !== undefined) {
-      data.image =
-        user.image === null
-          ? null
-          : typeof user.image === "string"
-            ? user.image
-            : null;
-    }
-
-    if (user.bio !== undefined) {
       data.bio = normalizeNullableString(user.bio);
     }
 
     if (user.image !== undefined) {
       data.image = normalizeNullableString(user.image);
     }
+
     const updatedUser = await prisma.user.update({
       where: {
         id: req.userId!,
@@ -157,7 +141,7 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       if (Array.isArray(target) && target.includes("username")) {
         return res.status(409).json({
           errors: {
-            username: ["has already been taken"],
+            username: [MESSAGES.USER.ALREADY_TAKEN],
           },
         });
       }
@@ -165,14 +149,14 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
       if (Array.isArray(target) && target.includes("email")) {
         return res.status(409).json({
           errors: {
-            email: ["has already been taken"],
+            email: [MESSAGES.USER.ALREADY_TAKEN],
           },
         });
       }
 
       return res.status(409).json({
         errors: {
-          body: ["already exists"],
+          body: [MESSAGES.USER.ALREADY_EXISTS],
         },
       });
     }
@@ -180,14 +164,14 @@ export async function updateUser(req: AuthenticatedRequest, res: Response) {
     if (error.code === "P2025") {
       return res.status(401).json({
         errors: {
-          token: ["is invalid"],
+          token: [MESSAGES.AUTH.TOKEN_INVALID],
         },
       });
     }
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

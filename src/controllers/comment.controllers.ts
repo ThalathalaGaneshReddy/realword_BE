@@ -1,6 +1,8 @@
 import { Response } from "express";
+
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { prisma } from "../lib/prisma";
+import { MESSAGES } from "../constants/messages";
 
 export const createComment = async (
   req: AuthenticatedRequest,
@@ -13,7 +15,7 @@ export const createComment = async (
     if (!comment) {
       return res.status(422).json({
         errors: {
-          body: ["can't be blank"],
+          body: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -21,7 +23,7 @@ export const createComment = async (
     if (typeof comment.body !== "string") {
       return res.status(422).json({
         errors: {
-          body: ["can't be blank"],
+          body: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -31,7 +33,7 @@ export const createComment = async (
     if (!body) {
       return res.status(422).json({
         errors: {
-          body: ["can't be blank"],
+          body: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -39,7 +41,7 @@ export const createComment = async (
     if (!req.userId) {
       return res.status(401).json({
         errors: {
-          token: ["is missing"],
+          token: [MESSAGES.AUTH.TOKEN_MISSING],
         },
       });
     }
@@ -53,7 +55,7 @@ export const createComment = async (
     if (!article) {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
@@ -83,7 +85,7 @@ export const createComment = async (
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -102,7 +104,7 @@ export const getComments = async (req: AuthenticatedRequest, res: Response) => {
     if (!article) {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
@@ -133,7 +135,7 @@ export const getComments = async (req: AuthenticatedRequest, res: Response) => {
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -153,7 +155,7 @@ export async function deleteComment(req: AuthenticatedRequest, res: Response) {
     if (!article) {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
@@ -161,7 +163,7 @@ export async function deleteComment(req: AuthenticatedRequest, res: Response) {
     if (!Number.isInteger(commentId)) {
       return res.status(404).json({
         errors: {
-          comment: ["not found"],
+          comment: [MESSAGES.COMMENT.NOT_FOUND],
         },
       });
     }
@@ -176,7 +178,7 @@ export async function deleteComment(req: AuthenticatedRequest, res: Response) {
     if (!comment) {
       return res.status(404).json({
         errors: {
-          comment: ["not found"],
+          comment: [MESSAGES.COMMENT.NOT_FOUND],
         },
       });
     }
@@ -184,7 +186,7 @@ export async function deleteComment(req: AuthenticatedRequest, res: Response) {
     if (comment.authorId !== req.userId) {
       return res.status(403).json({
         errors: {
-          comment: ["forbidden"],
+          comment: [MESSAGES.COMMENT.FORBIDDEN],
         },
       });
     }
@@ -201,7 +203,7 @@ export async function deleteComment(req: AuthenticatedRequest, res: Response) {
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

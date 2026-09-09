@@ -15,6 +15,8 @@ import {
 
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 
+import { MESSAGES } from "../constants/messages";
+
 export async function createArticleController(
   req: AuthenticatedRequest,
   res: Response,
@@ -25,7 +27,7 @@ export async function createArticleController(
     if (!article) {
       return res.status(422).json({
         errors: {
-          body: ["article is required"],
+          body: [MESSAGES.ARTICLE.REQUIRED],
         },
       });
     }
@@ -33,7 +35,7 @@ export async function createArticleController(
     if (typeof article.title !== "string" || !article.title.trim()) {
       return res.status(422).json({
         errors: {
-          title: ["can't be blank"],
+          title: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -44,7 +46,7 @@ export async function createArticleController(
     ) {
       return res.status(422).json({
         errors: {
-          description: ["can't be blank"],
+          description: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -52,7 +54,7 @@ export async function createArticleController(
     if (typeof article.body !== "string" || !article.body.trim()) {
       return res.status(422).json({
         errors: {
-          body: ["can't be blank"],
+          body: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -60,7 +62,7 @@ export async function createArticleController(
     if (article.tagList !== undefined && !Array.isArray(article.tagList)) {
       return res.status(422).json({
         errors: {
-          tagList: ["must be an array"],
+          tagList: [MESSAGES.VALIDATION.MUST_BE_ARRAY],
         },
       });
     }
@@ -80,7 +82,7 @@ export async function createArticleController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -132,7 +134,7 @@ export async function listArticlesController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -148,7 +150,7 @@ export async function getArticleController(
     if (!article) {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
@@ -161,7 +163,7 @@ export async function getArticleController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -177,14 +179,15 @@ export async function updateArticleController(
     if (!article) {
       return res.status(422).json({
         errors: {
-          body: ["article is required"],
+          body: [MESSAGES.ARTICLE.REQUIRED],
         },
       });
     }
+
     if (article.tagList === null) {
       return res.status(422).json({
         errors: {
-          tagList: ["must be an array"],
+          tagList: [MESSAGES.VALIDATION.MUST_BE_ARRAY],
         },
       });
     }
@@ -192,7 +195,7 @@ export async function updateArticleController(
     if (article.tagList !== undefined && !Array.isArray(article.tagList)) {
       return res.status(422).json({
         errors: {
-          tagList: ["must be an array"],
+          tagList: [MESSAGES.VALIDATION.MUST_BE_ARRAY],
         },
       });
     }
@@ -207,14 +210,15 @@ export async function updateArticleController(
     if (result.type === "NOT_FOUND") {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
+
     if (result.type === "FORBIDDEN") {
       return res.status(403).json({
         errors: {
-          article: ["forbidden"],
+          article: [MESSAGES.ARTICLE.FORBIDDEN],
         },
       });
     }
@@ -227,7 +231,7 @@ export async function updateArticleController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -243,14 +247,15 @@ export async function deleteArticleController(
     if (result.type === "NOT_FOUND") {
       return res.status(404).json({
         errors: {
-          article: ["not found"],
+          article: [MESSAGES.ARTICLE.NOT_FOUND],
         },
       });
     }
+
     if (result.type === "FORBIDDEN") {
       return res.status(403).json({
         errors: {
-          article: ["forbidden"],
+          article: [MESSAGES.ARTICLE.FORBIDDEN],
         },
       });
     }
@@ -261,7 +266,7 @@ export async function deleteArticleController(
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 
 import { prisma } from "../lib/prisma";
 import { getUserResponse } from "../utils/user-response";
+import { MESSAGES } from "../constants/messages";
 
 export async function register(req: Request, res: Response) {
   try {
@@ -11,7 +12,7 @@ export async function register(req: Request, res: Response) {
     if (!user) {
       return res.status(422).json({
         errors: {
-          body: ["user is required"],
+          body: [MESSAGES.USER.REQUIRED],
         },
       });
     }
@@ -19,21 +20,23 @@ export async function register(req: Request, res: Response) {
     if (typeof user.username !== "string" || !user.username.trim()) {
       return res.status(422).json({
         errors: {
-          username: ["can't be blank"],
+          username: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
+
     if (typeof user.email !== "string" || !user.email.trim()) {
       return res.status(422).json({
         errors: {
-          email: ["can't be blank"],
+          email: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
+
     if (typeof user.password !== "string" || !user.password.trim()) {
       return res.status(422).json({
         errors: {
-          password: ["can't be blank"],
+          password: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -50,7 +53,7 @@ export async function register(req: Request, res: Response) {
     if (existingUsername) {
       return res.status(409).json({
         errors: {
-          username: ["has already been taken"],
+          username: [MESSAGES.USER.ALREADY_TAKEN],
         },
       });
     }
@@ -64,7 +67,7 @@ export async function register(req: Request, res: Response) {
     if (existingEmail) {
       return res.status(409).json({
         errors: {
-          email: ["has already been taken"],
+          email: [MESSAGES.USER.ALREADY_TAKEN],
         },
       });
     }
@@ -89,7 +92,7 @@ export async function register(req: Request, res: Response) {
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
@@ -102,7 +105,7 @@ export async function login(req: Request, res: Response) {
     if (!user) {
       return res.status(422).json({
         errors: {
-          body: ["user is required"],
+          body: [MESSAGES.USER.REQUIRED],
         },
       });
     }
@@ -110,14 +113,15 @@ export async function login(req: Request, res: Response) {
     if (typeof user.email !== "string" || !user.email.trim()) {
       return res.status(422).json({
         errors: {
-          email: ["can't be blank"],
+          email: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
+
     if (typeof user.password !== "string" || !user.password.trim()) {
       return res.status(422).json({
         errors: {
-          password: ["can't be blank"],
+          password: [MESSAGES.VALIDATION.CANT_BE_BLANK],
         },
       });
     }
@@ -133,7 +137,7 @@ export async function login(req: Request, res: Response) {
     if (!dbUser) {
       return res.status(401).json({
         errors: {
-          credentials: ["invalid"],
+          credentials: [MESSAGES.AUTH.INVALID_CREDENTIALS],
         },
       });
     }
@@ -143,7 +147,7 @@ export async function login(req: Request, res: Response) {
     if (!passwordValid) {
       return res.status(401).json({
         errors: {
-          credentials: ["invalid"],
+          credentials: [MESSAGES.AUTH.INVALID_CREDENTIALS],
         },
       });
     }
@@ -156,7 +160,7 @@ export async function login(req: Request, res: Response) {
 
     return res.status(500).json({
       errors: {
-        body: ["Internal server error"],
+        body: [MESSAGES.SERVER.INTERNAL_ERROR],
       },
     });
   }
